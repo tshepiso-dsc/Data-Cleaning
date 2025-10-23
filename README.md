@@ -1,81 +1,45 @@
-import pandas as pd
+Step 1: Data Cleaning
+1.	Load the Data
 
-#LOAD CSV FILE
-df = pd.read_csv('financial_fraud_detection_dataset.csv')
-df.head()
+•	Use pandas to load the dataset.
 
-#PRINTING COLUMN NAMES
-print("Colunm Names")
-print(df.columns.tolist())
+•	Check for memory efficiency (consider using dtypes optimization).
 
-#PRINT INFO
-df.info()
+3.	Handle Missing Values
+   
+•	Identify missing values using .isnull().sum().
 
-#IDENIFY NULL VALUES
-df.isnull().sum()
+•	Decide on imputation strategies:
 
-#DROP NULL VALUES
-df['fraud_type'] = df['fraud_type'].fillna('None')
-df['time_since_last_transaction'] = df['time_since_last_transaction'].fillna(0)
+o	Numerical: mean/median or predictive imputation.
 
+o	Categorical: mode or "Unknown".
 
-#Identify Duplicates
-df.duplicated().count()
+o	Drop rows/columns if missingness is too high.
 
-#Remove Duplicates
-df.drop_duplicates()
-  print(len(df))
+5.	Remove Duplicates
+   
+•	Check for duplicate transaction_ids or rows.
 
-#Print Data Types
-print(df.dtypes)
+7.	Convert Data Types
+   
+•	Ensure timestamp is in datetime format.
 
-#Change Data Types
-df['timestamp'] = pd.to_datetime(df['timestamp'], format='mixed', errors='coerce')
-categorial_col = ['transaction_type', 'merchant_category', 'device_used', 'fraud_type', 'payment_channel']
-  for col in categorial_col:
-        df[col] = df[col].astype('category')       
-df['is_fraud'] = df['is_fraud'].astype(int)
+•	Convert categorical columns to category dtype for memory efficiency.
 
+9.	Outlier Detection (clip or remove)
+    
+•	Use boxplots or z-scores for columns like amount, velocity_score, etc.
 
-#Print New data Types
-print(df.dtypes)
+•	Consider log transformation for skewed distributions.
 
-#Drop NA
-df['timestamp'].isna()
+11.	Feature Engineering
+    
+•	Extract time-based features from timestamp (hour, day, weekday, etc.).
 
-#Import Stats Libraries
-import numpy as np
-from scipy.stats import zscore
-import matplotlib.pyplot as plt
+•	Encode categorical variables (transaction_type, merchant_category, etc.) using:
 
-#Outlier Detection 
-Q1 = df['amount'].quantile(0.25)
-Q3 = df['amount'].quantile(0.75)
-IQR = Q3 - Q1
-outliers = df[(df['amount'] < Q1 - 1.5 * IQR) | (df['amount'] > Q3 + 1.5 * IQR)]
-print(outliers)
+o	One-hot encoding (for tree-based models).
 
-#Inport Visualisation Libraries
-import seaborn as sns
-import matplotlib.pyplot as plt
-  sns.boxplot(x=df['amount'])
-  plt.show()
-
-#Cutting Outliers
-lower = df['amount'].quantile(0.05)
-upper = df['amount'].quantile(0.95)
-df['amount'] = df['amount'].clip(lower, upper)
-
-
-#Split date-time into separate columns
-df['hour'] = df['timestamp'].dt.hour
-df['day'] = df['timestamp'].dt.day
-df['month'] = df['timestamp'].dt.month
-df['year'] = df['timestamp'].dt.year
-df['weekday'] = df['timestamp'].dt.weekday
-
-
-#export cleaned data to csv
-df.to_csv('clean_fraud_data.csv')
-
+o	Label encoding or embeddings (for neural networks).
 
